@@ -79,6 +79,57 @@ inputType.addEventListener('change', function () {
   inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
 });
 
+class Workout {
+  id = (Date.now() + '').slice(-10);
+  date = new Date();
+  constructor(distance, duration, coords) {
+    this.distance = distance;
+    this.duration = duration;
+    this.coords = coords;
+  }
+}
+
+class Running extends Workout {
+  type = 'running';
+  constructor(distance, duration, coords, cadence) {
+    super(distance, duration, coords);
+    this.cadence = cadence;
+    this._calcPace();
+  }
+  _calcPace() {
+    this.pace = this.duration / this.distance;
+    return this.pace;
+  }
+}
+
+class Cycling extends Workout {
+  type = 'cycling';
+  constructor(distance, duration, coords, elevationGain) {
+    super(distance, duration, coords);
+    this.elevationGain = elevationGain;
+    this._calcSpeed();
+  }
+
+  _calcSpeed() {
+    this.speed = this.distance / (this.duration / 60);
+    return this.speed;
+  }
+}
+
 class Application {
+  map;
+  mapEvent;
+  workouts;
+  marker;
   constructor() {}
+
+  _getPosition() {}
+
+  _loadMap() {}
+
+  _showForm() {}
+
+  _toggleElevationField() {}
+
+  _newWorkout() {}
 }
