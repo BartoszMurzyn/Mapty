@@ -78,3 +78,7 @@ inputType.addEventListener('change', function () {
   inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
   inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
 });
+
+class Application {
+  constructor() {}
+}
