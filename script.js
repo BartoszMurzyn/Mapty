@@ -12,6 +12,8 @@ const deleteAllButton = document.querySelector('.button-deleteAll');
 // prettier-ignore
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+let map, mapEvent;
+
 //1. Getting Current Position
 
 if (navigator.geolocation)
@@ -22,7 +24,7 @@ if (navigator.geolocation)
 
       const coords = [latitude, longitude];
 
-      const map = L.map('map').setView(coords, 13);
+      map = L.map('map').setView(coords, 13);
 
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution:
@@ -37,6 +39,20 @@ if (navigator.geolocation)
       map.on('click', function (mapEvent) {
         const { lat, lng } = mapEvent.latlng;
         console.log(`You clicked on ${lat} and ${lng}`);
+
+        L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup(
+            L.popup({
+              maxWidth: 200,
+              minWidth: 150,
+              autoClose: false,
+              closeOnClick: false,
+              className: 'running-popup',
+            })
+          )
+          .setPopupContent('Clicked here')
+          .openPopup();
       });
     },
     function () {
