@@ -16,11 +16,6 @@ let map, mapEvent;
 
 //1. Getting Current Position
 
-inputType.addEventListener('change', function () {
-  inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
-  inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
-});
-
 class Workout {
   id = (Date.now() + '').slice(-10);
   date = new Date();
@@ -65,6 +60,7 @@ class Application {
   marker;
   constructor() {
     this._getPosition();
+    inputType.addEventListener('change', this._toggleElevationField);
   }
 
   _getPosition() {
@@ -129,9 +125,14 @@ class Application {
 
   _showForm() {}
 
-  _toggleElevationField() {}
+  _toggleElevationField() {
+    inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+    inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+  }
 
   _newWorkout() {}
+
+  _renderWorkoutMarker() {}
 }
 
 const app = new Application();
