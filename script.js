@@ -49,6 +49,13 @@ if (navigator.geolocation)
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+
+      inputDistance.value =
+        inputDuration.value =
+        inputCadence.value =
+        inputElevation.value =
+          '';
+
       const { lat, lng } = mapEvent.latlng;
       console.log(`You clicked on ${lat} and ${lng}`);
       L.marker([lat, lng])
