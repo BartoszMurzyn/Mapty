@@ -53,7 +53,7 @@ class Application {
   map;
   mapEvent;
   workouts;
-  marker;
+  markers;
   constructor() {
     this._getPosition();
     inputType.addEventListener('change', this._toggleElevationField);
@@ -143,18 +143,19 @@ class Application {
 
       workout = new Cycling([lat, lng], distance, duration, elevationGain);
     }
+  }
 
-    //add workout to worrkouts array
-    this.workouts.push(workout);
+  _renderWorkout(workout) {}
 
+  _renderWorkoutMarker(workout) {
     inputDistance.value =
       inputDuration.value =
       inputCadence.value =
       inputElevation.value =
         '';
 
-    console.log(`You clicked on ${lat} and ${lng}`);
-    L.marker([lat, lng])
+    // console.log(`You clicked on ${lat} and ${lng}`);
+    const marker = L.marker([workout.coords])
       .addTo(this.map)
       .bindPopup(
         L.popup({
@@ -167,23 +168,10 @@ class Application {
       )
       .setPopupContent('Clicked here')
       .openPopup();
-    // const workout =
 
-    // let html = `<li class="workout workout--running" data-id="1234567890">
-    // <h2 class="workout__title">Running on April 14</h2>
-    // <div class="workout__details">
-    //   <span class="workout__icon">🏃‍♂️</span>
-    //   <span class="workout__value">5.2</span>
-    //   <span class="workout__unit">km</span>
-    // </div>
-    // <div class="workout__details">
-    //   <span class="workout__icon">⏱</span>
-    //   <span class="workout__value">24</span>
-    //   <span class="workout__unit">min</span>
-    // </div>`
+    this.markers.push(marker);
+    console.log(marker);
   }
-
-  _renderWorkoutMarker() {}
 }
 
 const app = new Application();
