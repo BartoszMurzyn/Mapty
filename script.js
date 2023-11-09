@@ -12,14 +12,10 @@ const deleteAllButton = document.querySelector('.button-deleteAll');
 // prettier-ignore
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-let map, mapEvent;
-
-//1. Getting Current Position
-
 class Workout {
   id = (Date.now() + '').slice(-10);
   date = new Date();
-  constructor(distance, duration, coords) {
+  constructor(coords, distance, duration) {
     this.distance = distance;
     this.duration = duration;
     this.coords = coords;
@@ -28,8 +24,8 @@ class Workout {
 
 class Running extends Workout {
   type = 'running';
-  constructor(distance, duration, coords, cadence) {
-    super(distance, duration, coords);
+  constructor(coords, distance, duration, cadence) {
+    super(coords, distance, duration);
     this.cadence = cadence;
     this._calcPace();
   }
@@ -41,8 +37,8 @@ class Running extends Workout {
 
 class Cycling extends Workout {
   type = 'cycling';
-  constructor(distance, duration, coords, elevationGain) {
-    super(distance, duration, coords);
+  constructor(coords, distance, duration, elevationGain) {
+    super(coords, distance, duration);
     this.elevationGain = elevationGain;
     this._calcSpeed();
   }
@@ -61,6 +57,7 @@ class Application {
   constructor() {
     this._getPosition();
     inputType.addEventListener('change', this._toggleElevationField);
+    form.addEventListener('submit', this._newWorkout.bind(this));
   }
 
   _getPosition() {
@@ -71,32 +68,6 @@ class Application {
           alert("Mapty won't work without your location");
         }
       );
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      inputDistance.value =
-        inputDuration.value =
-        inputCadence.value =
-        inputElevation.value =
-          '';
-
-      const { lat, lng } = mapEvent.latlng;
-      console.log(`You clicked on ${lat} and ${lng}`);
-      L.marker([lat, lng])
-        .addTo(map)
-        .bindPopup(
-          L.popup({
-            maxWidth: 200,
-            minWidth: 150,
-            autoClose: false,
-            closeOnClick: false,
-            className: 'running-popup',
-          })
-        )
-        .setPopupContent('Clicked here')
-        .openPopup();
-    });
   }
   _loadMap(position) {
     const { latitude, longitude } = position.coords;
@@ -104,35 +75,61 @@ class Application {
 
     const coords = [latitude, longitude];
 
-    map = L.map('map').setView(coords, 13);
+    this.map = L.map('map').setView(coords, 13);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
+    }).addTo(this.map);
 
     L.marker(coords)
-      .addTo(map)
+      .addTo(this.map)
       .bindPopup('A pretty CSS popup.<br> Easily customizable.')
       .openPopup();
 
-    map.on('click', function (mapE) {
-      mapEvent = mapE;
-      form.classList.remove('hidden');
-      inputDistance.focus();
-    });
+    this.map.on('click', this._showForm.bind(this));
   }
 
-  _showForm() {}
+  _showForm(mapE) {
+    this.mapEvent = mapE;
+    form.classList.remove('hidden');
+    inputDistance.focus();
+  }
 
   _toggleElevationField() {
     inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
     inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
   }
 
-  _newWorkout() {}
+  _newWorkout(e) {
+    e.preventDefault();
+
+    inputDistance.value =
+      inputDuration.value =
+      inputCadence.value =
+      inputElevation.value =
+        '';
+
+    const { lat, lng } = this.mapEvent.latlng;
+    console.log(`You clicked on ${lat} and ${lng}`);
+    L.marker([lat, lng])
+      .addTo(this.map)
+      .bindPopup(
+        L.popup({
+          maxWidth: 200,
+          minWidth: 150,
+          autoClose: false,
+          closeOnClick: false,
+          className: 'running-popup',
+        })
+      )
+      .setPopupContent('Clicked here')
+      .openPopup();
+  }
 
   _renderWorkoutMarker() {}
 }
 
 const app = new Application();
+// const runTest = new Running([53, 21], 10, 60, 130);
+// console.log(runTest);
