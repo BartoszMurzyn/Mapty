@@ -41,23 +41,6 @@ if (navigator.geolocation)
         mapEvent = mapE;
         form.classList.remove('hidden');
         inputDistance.focus();
-        // const { lat, lng } = mapEvent.latlng;
-        // console.log(`You clicked on ${lat} and ${lng}`);
-
-        //   L.marker([lat, lng])
-        //     .addTo(map)
-        //     .bindPopup(
-        //       L.popup({
-        //         maxWidth: 200,
-        //         minWidth: 150,
-        //         autoClose: false,
-        //         closeOnClick: false,
-        //         className: 'running-popup',
-        //       })
-        //     )
-        //     .setPopupContent('Clicked here')
-        //     .openPopup();
-        // });
       },
       function () {
         alert("Mapty won't work without your location");
@@ -83,3 +66,8 @@ if (navigator.geolocation)
         .openPopup();
     });
   });
+
+inputType.addEventListener('change', function () {
+  inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+  inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+});
