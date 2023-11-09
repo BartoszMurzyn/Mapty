@@ -18,7 +18,7 @@ if (navigator.geolocation)
   navigator.geolocation.getCurrentPosition(
     function (position) {
       const { latitude, longitude } = position.coords;
-      console.log(latitude, longitude);
+      console.log(`Your current location is ${latitude} and ${longitude}`);
 
       const coords = [latitude, longitude];
 
@@ -33,6 +33,11 @@ if (navigator.geolocation)
         .addTo(map)
         .bindPopup('A pretty CSS popup.<br> Easily customizable.')
         .openPopup();
+
+      map.on('click', function (mapEvent) {
+        const { lat, lng } = mapEvent.latlng;
+        console.log(`You clicked on ${lat} and ${lng}`);
+      });
     },
     function () {
       alert("Mapty won't work without your location");
