@@ -62,6 +62,7 @@ class Application {
   workouts = [];
   markers = [];
   constructor() {
+    this._getLocalStorage();
     console.log(this.workouts);
     this._getPosition();
     inputType.addEventListener('change', this._toggleElevationField);
@@ -94,11 +95,11 @@ class Application {
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(this.map);
 
-    L.marker(coords)
-      .addTo(this.map)
-      .bindPopup('A pretty CSS popup.<br> Easily customizable.')
-      .openPopup();
-
+    // L.marker(coords)
+    //   .addTo(this.map)
+    //   .bindPopup('A pretty CSS popup.<br> Easily customizable.')
+    //   .openPopup();
+    this.workouts.forEach(workout => this._renderWorkoutMarker(workout));
     this.map.on('click', this._showForm.bind(this));
   }
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,6 +176,7 @@ class Application {
     this._hideForm();
     // this.workouts.push(this
     console.log(this.workouts);
+    this._setLocalStorage();
   }
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -260,8 +262,22 @@ class Application {
     );
     console.log(workout);
 
-    this.map.setView(workout.coords, 13);
+    this.map.setView(workout.coords, 13, {
+      animate: true,
+      pan: { duration: 1 },
+    });
     // console.log('clicked');
+  }
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.workouts));
+  }
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    if (!data) return;
+    this.workouts = data;
+    this.workouts.forEach(workout => this._renderWorkout(workout));
   }
 }
 
