@@ -9,9 +9,6 @@ const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const deleteAllButton = document.querySelector('.button-deleteAll');
 
-// prettier-ignore
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
 class Workout {
   id = (Date.now() + '').slice(-10);
   date = new Date();
@@ -19,6 +16,15 @@ class Workout {
     this.distance = distance;
     this.duration = duration;
     this.coords = coords;
+  }
+
+  _workoutDescription() {
+    // prettier-ignore
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
+      months[this.date.getMonth()]
+    } ${this.date.getDay()}`;
   }
 }
 
@@ -28,6 +34,7 @@ class Running extends Workout {
     super(coords, distance, duration);
     this.cadence = cadence;
     this._calcPace();
+    this._workoutDescription();
   }
   _calcPace() {
     this.pace = this.duration / this.distance;
@@ -40,6 +47,7 @@ class Cycling extends Workout {
   constructor(coords, distance, duration, elevationGain) {
     super(coords, distance, duration);
     this.elevationGain = elevationGain;
+    this._workoutDescription();
     this._calcSpeed();
   }
 
@@ -97,6 +105,11 @@ class Application {
     inputDistance.focus();
   }
 
+  _hideForm() {
+    form.classList.add('hidden');
+    inputDistance.focus();
+  }
+
   _toggleElevationField() {
     inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
     inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
@@ -145,11 +158,66 @@ class Application {
       workout = new Cycling([lat, lng], distance, duration, elevationGain);
     }
     this.workouts.push(workout);
+    this._renderWorkoutMarker(workout);
+
+    this._renderWorkout(workout);
+    this._hideForm();
     // this.workouts.push(this
     console.log(this.workouts);
   }
 
-  _renderWorkout(workout) {}
+  _renderWorkout(workout) {
+    let html = `<li class="workout workout--${workout.type}" data-id="${
+      workout.id
+    }">
+    <h2 class="workout__title">${workout.description}</h2>
+    <div class="workout__details">
+    <div class = 'buttons'>
+    <button class = 'btn-delete'> Delete</button>
+    <button class = 'btn-edit'> Edit</button>
+    </div>
+      <span class="workout__icon">${
+        workout.type === 'running' ? '🏃‍♂️' : '🚴🏼'
+      }</span>
+      <span class="workout__value">${workout.distance}</span>
+      <span class="workout__unit">km</span>
+    </div>
+    <div class="workout__details">
+      <span class="workout__icon">⏱</span>
+      <span class="workout__value">${workout.duration}</span>
+      <span class="workout__unit">min</span>
+    </div>`;
+
+    if (workout.type === 'running') {
+      html += `<div class="workout__details">
+
+      <span class="workout__icon">⚡️</span>
+      <span class="workout__value">${workout.pace}</span>
+      <span class="workout__unit">min/km</span>
+    </div>
+    <div class="workout__details">
+      <span class="workout__icon">🦶🏼</span>
+      <span class="workout__value">${workout.cadence}</span>
+      <span class="workout__unit">spm</span>
+    </div>
+  </li>`;
+    }
+    if (workout.type === 'cycling') {
+      html += `<div class="workout__details">
+
+      <span class="workout__icon">⚡️</span>
+      <span class="workout__value">${workout.speed}</span>
+      <span class="workout__unit">km/h</span>
+    </div>
+    <div class="workout__details">
+      <span class="workout__icon">⛰</span>
+      <span class="workout__value">${workout.elevationGain}</span>
+      <span class="workout__unit">m</span>
+    </div>
+  </li>`;
+    }
+    form.insertAdjacentHTML('afterend', html);
+  }
 
   _renderWorkoutMarker(workout) {
     inputDistance.value =
@@ -159,7 +227,7 @@ class Application {
         '';
 
     // console.log(`You clicked on ${lat} and ${lng}`);
-    const marker = L.marker([workout.coords])
+    const marker = L.marker(workout.coords)
       .addTo(this.map)
       .bindPopup(
         L.popup({
@@ -167,10 +235,10 @@ class Application {
           minWidth: 150,
           autoClose: false,
           closeOnClick: false,
-          className: 'running-popup',
+          className: `${workout.type}-popup`,
         })
       )
-      .setPopupContent('Clicked here')
+      .setPopupContent(`${workout.description}`)
       .openPopup();
 
     this.markers.push(marker);
