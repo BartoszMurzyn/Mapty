@@ -68,6 +68,9 @@ class Application {
     inputType.addEventListener('change', this._toggleElevationField);
     form.addEventListener('submit', this._newWorkout.bind(this));
     containerWorkouts.addEventListener('click', this._moveToWorkout.bind(this));
+    deleteAllButton.addEventListener('click', this.reset);
+    containerWorkouts.addEventListener('click', this._deleteWorkout.bind(this));
+    containerWorkouts.addEventListener('click', this._editWorkout.bind(this));
   }
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -231,6 +234,7 @@ class Application {
   </li>`;
     }
     form.insertAdjacentHTML('afterend', html);
+    deleteAllButton.classList.remove('btn-hidden');
   }
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -278,6 +282,65 @@ class Application {
     if (!data) return;
     this.workouts = data;
     this.workouts.forEach(workout => this._renderWorkout(workout));
+  }
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
+  }
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  _deleteWorkout(e) {
+    //deleting workout
+    this.workoutElement = e.target.closest('.workout');
+    const workoutID = e.target.closest('.workout').dataset.id;
+    // console.log(workoutID);
+    if (e.target.classList.contains('btn-delete')) {
+      console.log('About to delete', workoutID);
+      const workoutToDelete = this.workouts.find(work => work.id === workoutID);
+      const indexDeleteWorkout = this.workouts.indexOf(workoutToDelete);
+      // console.log(indexDeleteWorkout);
+      this.workoutElement.remove();
+      localStorage.removeItem(`${workoutToDelete.id}`);
+      this.workouts.splice(indexDeleteWorkout, 1);
+      this._setLocalStorage();
+
+      //deleting workouts marker
+      this.markers.forEach((value, index) => {
+        if (index === indexDeleteWorkout) {
+          console.log('This marker');
+          this.map.removeLayer(value);
+        }
+      });
+    }
+  }
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  _editWorkout(e) {
+    if (!this.workoutElement) return;
+    if (e.target.classList.contains('btn-edit')) {
+      this.workoutElement = e.target.closest('.workout');
+      const workoutID = e.target.closest('.workout').dataset.id;
+      console.log(workoutID);
+      const workoutToEdit = this.workouts.find(work => work.id === workoutID);
+
+      form.classList.toggle('hidden');
+
+      workoutToEdit.distance = +inputDistance.value;
+      workoutToEdit.duration = +inputDuration.value;
+      workoutToEdit.cadence = +inputCadence.value;
+      workoutToEdit.elevationGain = +inputElevation.value;
+      workoutToEdit.type = inputType.value;
+      this.coords = workoutToEdit.coords;
+
+      const editedWorkouts = this.workouts.filter(
+        value => value.distance !== 0 || value.duration !== 0
+      );
+      this.workouts = editedWorkouts;
+
+      this.workoutElement.remove();
+      this._deleteWorkout();
+      console.log('You will edit this workout');
+    }
   }
 }
 
