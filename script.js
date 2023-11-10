@@ -52,9 +52,10 @@ class Cycling extends Workout {
 class Application {
   map;
   mapEvent;
-  workouts;
-  markers;
+  workouts = [];
+  markers = [];
   constructor() {
+    console.log(this.workouts);
     this._getPosition();
     inputType.addEventListener('change', this._toggleElevationField);
     form.addEventListener('submit', this._newWorkout.bind(this));
@@ -143,6 +144,9 @@ class Application {
 
       workout = new Cycling([lat, lng], distance, duration, elevationGain);
     }
+    this.workouts.push(workout);
+    // this.workouts.push(this
+    console.log(this.workouts);
   }
 
   _renderWorkout(workout) {}
@@ -170,7 +174,6 @@ class Application {
       .openPopup();
 
     this.markers.push(marker);
-    console.log(marker);
   }
 }
 
