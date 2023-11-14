@@ -98,10 +98,6 @@ class Application {
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(this.map);
 
-    // L.marker(coords)
-    //   .addTo(this.map)
-    //   .bindPopup('A pretty CSS popup.<br> Easily customizable.')
-    //   .openPopup();
     this.workouts.forEach(workout => this._renderWorkoutMarker(workout));
     this.map.on('click', this._showForm.bind(this));
   }
@@ -177,8 +173,7 @@ class Application {
 
     this._renderWorkout(workout);
     this._hideForm();
-    // this.workouts.push(this
-    console.log(this.workouts);
+
     this._setLocalStorage();
   }
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -264,13 +259,11 @@ class Application {
     const workout = this.workouts.find(
       workout => workout.id === workoutElement.dataset.id
     );
-    console.log(workout);
 
     this.map.setView(workout.coords, 13, {
       animate: true,
       pan: { duration: 1 },
     });
-    // console.log('clicked');
   }
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   _setLocalStorage() {
@@ -280,6 +273,8 @@ class Application {
   _getLocalStorage() {
     const data = JSON.parse(localStorage.getItem('workouts'));
     if (!data) return;
+
+    this._restoreClasses(data);
     this.workouts = data;
     this.workouts.forEach(workout => this._renderWorkout(workout));
   }
@@ -293,26 +288,52 @@ class Application {
     //deleting workout
     this.workoutElement = e.target.closest('.workout');
     const workoutID = e.target.closest('.workout').dataset.id;
-    // console.log(workoutID);
     if (e.target.classList.contains('btn-delete')) {
       console.log('About to delete', workoutID);
       const workoutToDelete = this.workouts.find(work => work.id === workoutID);
       const indexDeleteWorkout = this.workouts.indexOf(workoutToDelete);
-      // console.log(indexDeleteWorkout);
+
       this.workoutElement.remove();
       localStorage.removeItem(`${workoutToDelete.id}`);
       this.workouts.splice(indexDeleteWorkout, 1);
       this._setLocalStorage();
 
       //deleting workouts marker
-      this.markers.forEach((value, index) => {
-        if (index === indexDeleteWorkout) {
-          console.log('This marker');
-          this.map.removeLayer(value);
-        }
-      });
+
+      this._deleteWorkoutMarker(indexDeleteWorkout);
     }
   }
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  _deleteWorkoutMarker(workoutIndex) {
+    this.markers.forEach((value, index) => {
+      if (index === workoutIndex) {
+        console.log('This marker');
+        this.map.removeLayer(value);
+      }
+    });
+  }
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  _restoreClasses(data) {
+    data.forEach((workout, index) => {
+      data[index] =
+        workout.type === 'running'
+          ? new Running(
+              workout.coords,
+              workout.distance,
+              workout.duration,
+              workout.cadence
+            )
+          : new Cycling(
+              workout.coords,
+              workout.distance,
+              workout.duration,
+              workout.elevationGain
+            );
+    });
+  }
+
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   _editWorkout(e) {
@@ -338,12 +359,10 @@ class Application {
       this.workouts = editedWorkouts;
 
       this.workoutElement.remove();
-      this._deleteWorkout();
+      this._deleteWorkoutMarker();
       console.log('You will edit this workout');
     }
   }
 }
 
 const app = new Application();
-// const runTest = new Running([53, 21], 10, 60, 130);
-// console.log(runTest);
